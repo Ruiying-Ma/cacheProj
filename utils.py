@@ -9,7 +9,7 @@ from openbox import space as sp
 from openbox import Optimizer
 from datetime import datetime
 
-LIBCACHSIM_PATH="/home/v-ruiyingma/libCacheSim" # /absolute/path/to/libCacheSim
+LIBCACHSIM_PATH="/absolute/path/to/libCacheSim"
 
 
 def write_to_file(dest_path: str, contents, is_append=False, is_json=False):
