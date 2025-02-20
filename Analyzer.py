@@ -160,7 +160,7 @@ class Analyzer:
                         has_header=False,
                         delimiter=","
                     ),
-                    system_path="/home/v-ruiyingma/llm4sys/cache",
+                    system_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "cache"),
                     tune_runs=20,
                     code_folder=os.path.join(self.trace_analysis_folder, "log", "qd_combine_optimizer_cache", "code"),
                     tune_int_upper=None

@@ -78,7 +78,10 @@ To write the code, follow the instruction in [code_design_prompt.txt](./code_des
     The result will be recorded in [miss_ratio.jsonl](./analysis/miss_ratio.jsonl), and [miss_ratio_percentile.png](./analysis/miss_ratio_percentile.png) is its visualiztion. The miss ratio (tuned) is calculated as a reduction w.r.t. FIFO's miss ratio:
 
     ![image](./img/mr_reduction.png)
+
     (cited from [s3fifo paper](https://dl.acm.org/doi/pdf/10.1145/3600006.3613147) page 8 first paragraph.)
+
+    Currently [miss_ratio.jsonl](./analysis/miss_ratio.jsonl) is empty. If you want to reproduce the current [miss_ratio_percentile.png](./analysis/miss_ratio_percentile.png) before designing your own policy, simply run [test.py](./test.py). 
 
     If you want to visualize the result using default miss ratios, simply set `use_default` as True (line 35 in [test.py](./test.py)).
 
