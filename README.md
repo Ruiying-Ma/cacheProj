@@ -1,7 +1,7 @@
 # Deisgn a New Cache Replacement Policy
 ## Prerequisites
 ### Install Python Packages
-Install `colorlog` and `numpy`. For example, if you use anaconda:
+Install `matplotlib`, `colorlog` and `numpy`. For example, if you use anaconda:
 ```bash
 conda install conda-forge::colorlog
 conda isntall conda-forge::numpy
@@ -75,10 +75,22 @@ To write the code, follow the instruction in [code_design_prompt.txt](./code_des
     python test.py
     ```
     
-    The result will be recorded in [miss_ratio.jsonl](./analysis/miss_ratio.jsonl), and [miss_ratio_percentile.png](./analysis/miss_ratio_percentile.png) is its visualiztion. The miss ratio is calculated as a reduction w.r.t. FIFO's miss ratio:
+    The result will be recorded in [miss_ratio.jsonl](./analysis/miss_ratio.jsonl), and [miss_ratio_percentile.png](./analysis/miss_ratio_percentile.png) is its visualiztion. The miss ratio (tuned) is calculated as a reduction w.r.t. FIFO's miss ratio:
 
     ![image](./img/mr_reduction.png)
     (cited from [s3fifo paper](https://dl.acm.org/doi/pdf/10.1145/3600006.3613147) page 8 first paragraph.)
+
+    If you want to visualize the result using default miss ratios, simply set `use_default` as True (line 35 in [test.py](./test.py)).
+
+    > **Note: Tuned vs. Default miss ratios**
+    >
+    > Many policies have user-defined parameters. For example, user can choose the window size and the main cache type for [tinyLFU](https://github.com/1a1a11a/libCacheSim/blob/develop/libCacheSim/cache/eviction/WTinyLFU.c) in libCacheSim. [214.py](./cache/sample_code/214.py) also have tunable parameter `LEARNING_RATE`.
+    > 
+    > We find that by tuning such parameters, there is a performance boost (i.e., a drop in miss ratio). 
+    > 
+    > Tuned miss ratio is the minimum miss ratio after tuning such parameters for several (20) runs.
+    >
+    > Default miss ratio is the miss ratio using the default parameters, without any tuning. 
 
 ## More info
 You may skip this section. 
