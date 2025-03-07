@@ -186,6 +186,9 @@ class Analyzer:
                 fixed_default_param=False,
                 need_log=True
             )
+            if tuned_mr == None or tuned_mr > default_mr:
+                tuned_mr = default_mr
+                tuned_params = default_params
             entry = AnalyzerEntry(
                 trace_path=trace_path,
                 cache_cap=cache_cap,

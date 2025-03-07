@@ -261,7 +261,7 @@ class SimulatorCache(SimulatorBase):
         '''
         space = sp.Space()
 
-        tp_pattern = r'(# Put tunable constant parameters below\s*\n)(.*?)(?=^# Put additional variables below\s*\n|^def)'
+        tp_pattern = r'(# Put tunable constant parameters below\s*\n)(.*?)(?=^# Put the metadata specifically maintained by the policy below)'
 
         tunable_parameters: str = extract_string(
             text=code,
@@ -333,7 +333,7 @@ class SimulatorCache(SimulatorBase):
         - new_code (str)
         '''
         assert params != None
-        tp_pattern = r'(# Put tunable constant parameters below\s*\n)(.*?)(?=^# Put additional variables below\s*\n|^def)'
+        tp_pattern = r'(# Put tunable constant parameters below\s*\n)(.*?)(?=^# Put the metadata specifically maintained by the policy below)'
 
         tunable_parameters = extract_string(
             text=code,
