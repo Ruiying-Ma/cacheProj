@@ -101,6 +101,17 @@ class Analyzer:
         )
         return trace.get_ndv(range_s=range_s, range_e=range_e)
     
+    def _get_candid_entries(self, trace_filter, cache_cap_frac_filter, algo_filter):
+        def entry_filter(entry: AnalyzerEntry):
+            if trace_filter(entry.trace_path) == False:
+                return False
+            if cache_cap_frac_filter(entry.cache_cap_frac) == False:
+                return False
+            if algo_filter(entry.algo) == False:
+                return False
+            return True
+        return [e for e in self.entries if entry_filter(e) == True]
+    
     def simulate(self, trace_path: str, cache_cap_frac: float, algo: str, is_sota: bool):
         '''
         Args:

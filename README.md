@@ -1,4 +1,11 @@
 # Deisgn a New Cache Replacement Policy
+> Section are updated! Please:
+> 1. Clean your [miss_ratio.jsonl](./analysis/miss_ratio.jsonl) file
+> 2. Create an empty file named `cross_validate.jsonl` under the folder `analysis/`.
+> 3. Rerun [test.py](./test.py) to reproduce the two figures under [analysis/](./analysis/)
+>
+> You may first check the red texts below (which are the updates) before doing these.
+
 ## Prerequisites
 ### Install Python Packages
 Install `matplotlib`, `colorlog` and `numpy`. For example, if you use anaconda:
@@ -69,7 +76,7 @@ To write the code, follow the instruction in [code_design_prompt.txt](./code_des
 
 1. [Design] Come up with a cache replacement policy. 
 2. [Design] Implement the required functions following the instructions, and save the python code file under [cache/sample_code](./cache/sample_code/) using a brand-new file name.
-3. [Test] Add the absolute path of your code to `self_designed_algo_list` in line 41 of  [test.py](./test.py), and then run
+3. [Test] Add the absolute path of your code to `self_designed_algo_list` in line 61 of  [test.py](./test.py), and then run
 
     ```bash
     python test.py
@@ -83,7 +90,7 @@ To write the code, follow the instruction in [code_design_prompt.txt](./code_des
 
     Currently [miss_ratio.jsonl](./analysis/miss_ratio.jsonl) is empty. If you want to reproduce the current [miss_ratio_percentile.png](./analysis/miss_ratio_percentile.png) before designing your own policy, simply run [test.py](./test.py). 
 
-    If you want to visualize the result using default miss ratios, simply set `use_default` as True (line 35 in [test.py](./test.py)).
+    If you want to visualize the result using default miss ratios, simply set `use_default` as True (line 47 in [test.py](./test.py)).
 
     > **Note: Tuned vs. Default miss ratios**
     >
@@ -94,6 +101,18 @@ To write the code, follow the instruction in [code_design_prompt.txt](./code_des
     > Tuned miss ratio is the minimum miss ratio after tuning such parameters for several (20) runs.
     >
     > Default miss ratio is the miss ratio using the default parameters, without any tuning. 
+
+    <span style="color: red;">We add cross validation to [test.py](./test.py). The results are recorded in [cross_validate.jsonl](./analysis/cross_validate.jsonl), (currently empty, run [test.py](./test.py) to reproduce it), and [xval_miss_ratio_percentile.png](./analysis/xval_miss_ratio_percentile.png) is its visualization.</span>
+    
+    > **Note: Cross Validation**
+    >
+    > For a given tunable cache replacement policy, we can tune its parameters on each cache trace. This results in the policy having different parameters for different traces. However, in practice, people can only select **one** parameter configuration for different traces.
+    >
+    > Therefore, we use *cross validation* to choose the optimal parameter configuration. We first tune parameters on each trace. Then, for each tuned parameter configuration, we test its performance on the other traces in the test set. Finally, we select the parameter configuration whose *overall performance* as the optimal.
+    >
+    > The *overall performance* of a parameter configuration is defined by (90, 75, 50, 25, 10) percentile of its miss ratios over the traces in the test set, as written in line 292 of [CrossValidator.py](./CrossValidator.py).
+
+    <span style="color: red;">Note that for a policy, its miss ratios in [miss_ratio_percentile.png](./analysis/miss_ratio_percentile.png) may be **worse** than those in [xval_miss_ratio_percentile.png](./analysis/xval_miss_ratio_percentile.png). This is because our tuning process may fail to find the global optimal for each trace.</span>
 
 ## More info
 You may skip this section. 
@@ -123,7 +142,7 @@ twoq, slru, RandomLRU, tinyLFU, fifomerge, sfifo, sfifov0, lru-prob, s3lru, s3fi
 
 
 #### Timeout limit
-The cache simulator has a timeout limit set as 5 seconds. For our cases ([alpha1_m100_n1000](./cache/trace/zipf/alpha1_m100_n1000/)), 5s is enough to simulate a replacement policy on one trace. If it exceeds this limit, with high probability there is an infinite loop in the replacement policy. If you want to change this limit, go to [Simulator.py](./Simulator.py) and change `SimulatorBase.timeout_limit` (line 61). 
+The cache simulator has a timeout limit set as 5 seconds. For our cases ([alpha1_m100_n1000](./cache/trace/zipf/alpha1_m100_n1000/)), 5s is enough to simulate a replacement policy on one trace. If it exceeds this limit, with high probability there is an infinite loop in the replacement policy. <span style="color: red;">However, as we use muliprocessing in [CrossValidator.py](./CrossValidator.py), we set the timeout_limit as 10.</span> If you want to change this limit, go to [Simulator.py](./Simulator.py) and change `SimulatorBase.timeout_limit` (line 58). 
 
 #### Tune runs
 You can set the number of runs to tune the parameters in a cache replacement policy by setting `tune_runs` in `SimulatorConfig`(line 45 in [Simulator.py](./Simulator.py)).

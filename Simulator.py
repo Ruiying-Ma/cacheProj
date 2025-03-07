@@ -55,10 +55,7 @@ class SimulatorConfig:
         self.tune_int_upper = tune_int_upper
 
 class SimulatorBase(ABC):
-    '''
-    Caution: doesn't support multi-threaded/distributed computation. So, one can instantiate at most one Simlutor.
-    '''
-    timeout_limit: int=5
+    timeout_limit: int=10
     def __init__(
         self,
         simulator_config: SimulatorConfig
