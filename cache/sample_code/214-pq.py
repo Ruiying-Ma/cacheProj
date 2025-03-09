@@ -23,7 +23,7 @@ def evict(cache_snapshot, obj):
     - Return:
         - `candid_obj_key`: The key of the cached object that will be evicted to make room for `obj`.
     '''
-    victem_key = heapq.heappop(cache_keys_pq)[2]
+    victem_key = cache_keys_pq[0][2]
     
     return victem_key
 
@@ -68,6 +68,7 @@ def update_after_evict(cache_snapshot, obj, evicted_obj):
     - Return: `None`
     '''
     evicted_key = evicted_obj.key
+    assert heapq.heappop(cache_keys_pq)[2] == evicted_obj.key
     for key in dynamic_learning_matrix:
         if evicted_key in dynamic_learning_matrix[key]:
             dynamic_learning_matrix[key][evicted_key] *= (1 - LEARNING_RATE)
