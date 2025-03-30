@@ -9,7 +9,7 @@ from openbox import space as sp
 from openbox import Optimizer
 from datetime import datetime
 
-LIBCACHSIM_PATH="/absolute/path/to/libCacheSim"
+LIBCACHSIM_PATH="/home/v-ruiyingma/libCacheSim"
 
 
 def write_to_file(dest_path: str, contents, is_append=False, is_json=False):
@@ -71,6 +71,16 @@ def run_libcachesim(cache_trace, cache_alg, cache_cap, params=""):
     '''
     Return miss ratio. `None` if fail.
     '''
+    if cache_alg == "tinyLFU-slru" or cache_alg == "full-tinylfu-slru":
+        new_cache_alg = "tinyLFU" if cache_alg == "tinyLFU-slru" else "full-tinylfu"
+        cache_alg = new_cache_alg
+        if params != "":
+            if "main-cache=" in params:
+                assert "main-cache=SLRU" in params
+            else:
+                assert not params.endswith(",")
+                params += ",main-cache=SLRU"
+
     if params != "" and not params.startswith(" -e "):
         params = " -e " + params.strip()
     
@@ -110,6 +120,16 @@ def tune_libcachesim(trace, alg, cache_cap, fixed_default_params: bool=False, tu
         },
         "tinyLFU": {
             "main-cache": [str, "SLRU", ["LRU", "SLRU", "LFU", "FIFO", "ARC", "clock", "SIEVE"]],
+            "window-size": [float, 0.01, 0.0, 0.9999]
+        },
+        "tinyLFU-slru": {
+            "window-size": [float, 0.01, 0.0, 0.9999]
+        },
+        "full-tinylfu": {
+            "main-cache": [str, "SLRU", ["LRU", "SLRU", "LFU", "FIFO", "ARC", "clock", "SIEVE"]],
+            "window-size": [float, 0.01, 0.0, 0.9999]
+        },
+        "full-tinylfu-slru": {
             "window-size": [float, 0.01, 0.0, 0.9999]
         },
         "fifomerge": {

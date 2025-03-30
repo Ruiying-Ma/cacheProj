@@ -48,7 +48,8 @@ class AnalyzerEntry:
         (trace_path, cache_cap_frac, algo)
         '''
         return (
-            self.trace_path,
+            # self.trace_path,
+            os.path.basename(self.trace_path),
             self.cache_cap_frac,
             self.algo
         )
@@ -87,7 +88,8 @@ class AnalyzerEntry:
         return json.dumps(self.to_dict())
 
 class Analyzer:
-    trace_analysis_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "analysis")
+    # trace_analysis_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "analysis")
+    trace_analysis_folder = "/home/v-ruiyingma/llm4sys/cache/trace_analysis"
     miss_ratio_jsonl_path = os.path.join(trace_analysis_folder, "miss_ratio.jsonl")
     def __init__(self):
         with open(self.miss_ratio_jsonl_path, 'r') as file:
@@ -128,8 +130,12 @@ class Analyzer:
 
         # algo_name = algo if is_sota == True else os.path.basename(algo).replace(".py", "")
         algo_name = algo
-        
-        candid_entries = [e for e in self.entries if e.signature == (trace_path, cache_cap_frac, algo_name)]
+
+        candid_entries = self._get_candid_entries(
+            trace_filter=lambda p: os.path.basename(p) == os.path.basename(trace_path),
+            cache_cap_frac_filter=lambda ccf: ccf == cache_cap_frac,
+            algo_filter=lambda alg: alg == algo
+        )
         if len(candid_entries) > 0:
             assert len(candid_entries) == 1
             logging.info(f"({trace_path}, {algo}, {cache_cap_frac}) has already been simulated")
@@ -241,7 +247,7 @@ class Analyzer:
                 plt.scatter(range(len(y)), y, label="Mean", marker=next(markers), color=next(colors), s=480)
         if plt.ylim()[0] < -0.1:
             plt.ylim(bottom=-0.04)
-        plt.xticks(range(len(algo_list)), [os.path.basename(a).replace(".py", "") for a in algo_list], fontsize=32, rotation=28)
+        plt.xticks(range(len(algo_list)), [os.path.basename(a).replace(".py", "") for a in algo_list], fontsize=32, rotation=90)
         plt.ylabel(f"Miss ratio reduction from FIFO")
         plt.grid(linestyle="--")
         plt.legend(

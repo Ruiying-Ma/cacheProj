@@ -132,7 +132,7 @@ class CrossValidator:
         candid_params_str = set([json.dumps(e.miss_ratio_info.tuned_params) for e in candid_miss_ratio_entries])
         if len(candid_miss_ratio_entries) > 0:
             candid_params_str.add(json.dumps(candid_miss_ratio_entries[0].miss_ratio_info.default_params))
-        return [dict(json.loads(ps)) for ps in candid_params_str]
+        return [dict(json.loads(ps)) if ps != "null" else None for ps in candid_params_str]
 
     def _add_entry(self, new_entry: CrossValidatorEntry):
         self.cross_validate_entries.append(new_entry)
