@@ -8,6 +8,9 @@ import traceback
 from openbox import space as sp
 from openbox import Optimizer
 from datetime import datetime
+import itertools
+import matplotlib.pyplot as plt
+import numpy as np
 
 LIBCACHSIM_PATH="/home/v-ruiyingma/libCacheSim"
 
@@ -81,6 +84,10 @@ def run_libcachesim(cache_trace, cache_alg, cache_cap, params=""):
                 assert not params.endswith(",")
                 params += ",main-cache=SLRU"
 
+    if cache_alg in ["slru", "sfifo", "sfifov0"]:
+        if cache_cap == 1:
+            params = "n-seg=1"
+
     if params != "" and not params.startswith(" -e "):
         params = " -e " + params.strip()
     
@@ -106,13 +113,16 @@ def tune_libcachesim(trace, alg, cache_cap, fixed_default_params: bool=False, tu
     - `None`: fail to run libcachesim
     '''
     # map: param_name -> type, default, lower, uppper/type, default, choice
+    default_seg_num = 4
+    if cache_cap <= default_seg_num:
+        default_seg_num = 1
     m_trace_params = {
         "twoq": {
             "Ain-size-ratio": [float, 0.25, 0.0, 1.0],
             "Aout-size-ratio": [float, 0.5, 0.0, 1.0]
         },
         "slru": {
-            "n-seg": [int, 4, 1, cache_cap],
+            "n-seg": [int, default_seg_num, 1, cache_cap],
             # seg-size
         },
         "RandomLRU": {
@@ -134,14 +144,14 @@ def tune_libcachesim(trace, alg, cache_cap, fixed_default_params: bool=False, tu
         },
         "fifomerge": {
             "retain-policy": [str, "freq", ["freq", "recency"]],
-            "n-exam": [int, 100, 0, cache_cap],
-            "ratio": [int, 2, 1, cache_cap],
+            "n-exam": [int, 100, 0, max(cache_cap, 100)],
+            "ratio": [int, 2, 1, max(cache_cap, 100)],
         },
         "sfifo": {
-            "n-seg": [int, 4, 1, cache_cap]
+            "n-seg": [int, default_seg_num, 1, cache_cap]
         },
         "sfifov0": {
-            "n-queue": [int, 4, 1, cache_cap]
+            "n-queue": [int, default_seg_num, 1, cache_cap]
         },
         "lru-prob": {
             "prob": [float, 0.5, 0.0001, 1.0]
@@ -169,6 +179,11 @@ def tune_libcachesim(trace, alg, cache_cap, fixed_default_params: bool=False, tu
         #     "n-bit-counter": [int, 1, 0, 63]
         # },
     }
+
+    if cache_cap == 1:
+        del m_trace_params["slru"]
+        del m_trace_params["sfifo"]
+        del m_trace_params["sfifov0"]
 
     if fixed_default_params == True:
         for algo in m_trace_params:
@@ -255,9 +270,44 @@ def tune_libcachesim(trace, alg, cache_cap, fixed_default_params: bool=False, tu
     return default_mr, tuned_mr, default_params, tuned_params
     
 def miss_ratio_reduction(mr, fifo_mr):
+    assert mr != None
     assert mr != 0.0
+    assert fifo_mr != None
     assert fifo_mr != 0.0
     if mr > fifo_mr:
         return (fifo_mr - mr) / mr
     else:
         return (fifo_mr - mr) / fifo_mr
+    
+def plot_mr(m_algo_mr: dict, png_path):
+    markers = itertools.cycle("<^osv>v*p")
+    colors = itertools.cycle(
+        reversed(["#b2182b", "#ef8a62", "#fddbc7", "#d1e5f0", "#67a9cf", "#2166ac"])
+    )
+    algo_list = list(m_algo_mr.keys())
+    assert "fifo" not in algo_list
+    # plot
+    plt.figure(figsize=(28, 8))
+    percentiles = [10, 25, 50, 75, 90]
+    # algo_list.remove("fifo")
+    for perc in percentiles:
+        y = [np.percentile(m_algo_mr[algo], perc) for algo in algo_list]
+        plt.scatter(range(len(y)), y, label=f"P{perc}", marker=next(markers), color=next(colors), s=480)
+        if perc == 50:
+            # Mean
+            y = [np.mean(m_algo_mr[algo]) for algo in algo_list]
+            plt.scatter(range(len(y)), y, label="Mean", marker=next(markers), color=next(colors), s=480)
+    if plt.ylim()[0] < -0.1:
+        plt.ylim(bottom=-0.04)
+    plt.xticks(range(len(algo_list)), [os.path.basename(a).replace(".py", "") for a in algo_list], fontsize=32, rotation=90)
+    plt.ylabel(f"Miss ratio reduction from FIFO")
+    plt.grid(linestyle="--")
+    plt.legend(
+        ncol=8,
+        loc="upper left",
+        fontsize=38,
+        bbox_to_anchor=(-0.02, 1.2),
+        frameon=False,
+    )
+    plt.savefig(png_path, bbox_inches="tight")
+    plt.clf()

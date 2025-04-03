@@ -55,7 +55,7 @@ class SimulatorConfig:
         self.tune_int_upper = tune_int_upper
 
 class SimulatorBase(ABC):
-    timeout_limit: int=10
+    timeout_limit: int=600
     def __init__(
         self,
         simulator_config: SimulatorConfig

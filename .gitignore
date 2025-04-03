@@ -8,5 +8,5 @@ test.sh
 cache/sample_code/
 cache/trace/
 img/
-analysis/
 *.out
+*.png

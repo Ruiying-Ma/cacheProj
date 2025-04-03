@@ -95,13 +95,21 @@ class Trace:
                 entry.next_vtime = -1
             m_key_vtime[entry.key] = entry.time
     
-    def to_bin(self, path: str):
+    def to_bin(self, path: str, start=None, end=None):
+        if start == None or start < 0:
+            start = 0
+        if end == None or end > len(self.entries):
+            end = len(self.entries)
         with open(path, "wb") as f:
-            for entry in self.entries:
+            for entry in self.entries[start:end]:
                 f.write(entry.to_bin())
 
-    def to_csv(self, path: str):
+    def to_csv(self, path: str, start=None, end=None):
+        if start == None or start < 0:
+            start = 0
+        if end == None or end > len(self.entries):
+            end = len(self.entries)
         with open(path, "w") as f:
-            for entry in self.entries:
+            for entry in self.entries[start:end]:
                 f.write(entry.to_csv() + "\n")
-        
+                
