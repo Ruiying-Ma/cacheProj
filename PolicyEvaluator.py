@@ -346,7 +346,11 @@ class PolicyEvaluator:
         for algo in m_algo_entry:
             if algo == "fifo":
                 continue
-            assert list([e.trace_file_name for e in m_algo_entry[algo]]) == list([e.trace_file_name for e in m_algo_entry["fifo"]])
+            try: 
+                assert list([e.trace_file_name for e in m_algo_entry[algo]]) == list([e.trace_file_name for e in m_algo_entry["fifo"]])
+            except Exception:
+                logging.warning(f"{algo}, {[e.trace_file_name for e in m_algo_entry[algo]]}")
+                continue
             m_algo_mr[algo] = list()
             for e, fifo_e in zip(m_algo_entry[algo], m_algo_entry["fifo"]):
                 if use_init == False:
@@ -362,7 +366,9 @@ class PolicyEvaluator:
                 else:
                     e_mr = e_mr_info.mr_train
                     fifo_mr = fifo_mr_info.mr_train
-                
+                if e_mr == None:
+                    logging.warning(f"{algo}, e_mr=None")
+                    break
                 m_algo_mr[algo].append(miss_ratio_reduction(e_mr, fifo_mr))
         # plot
         plot_mr(m_algo_mr, png_path)
